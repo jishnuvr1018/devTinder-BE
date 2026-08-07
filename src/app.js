@@ -17,7 +17,7 @@ dbConnect()
     });
   })
   .catch((err) => {
-    console.log("DB connection Failed......", err);
+    console.log("DB connection Failed......" + err);
   });
 
 // #. Signup API
@@ -27,7 +27,7 @@ app.post("/signup", async (req, res) => {
     await user.save();
     res.status(201).send("User created successfully");
   } catch (err) {
-    res.status(400).send("Error while creating user");
+    res.status(400).send("Error while creating user" + err);
   }
 });
 
@@ -37,7 +37,7 @@ app.get("/feed", async (req, res) => {
     const users = await User.find({});
     res.send(users);
   } catch (err) {
-    res.status(400).send("Error while fetching users");
+    res.status(400).send("Error while fetching users" + err);
   }
 });
 
@@ -51,26 +51,43 @@ app.get("/user", async (req, res) => {
       res.send(user);
     }
   } catch (err) {
-    res.status(400).send("Error while fetching user");
+    res.status(400).send("Error while fetching user" + err);
   }
 });
 
 //#. Delete user
-app.delete("/user", async (req, res) => {
+app.delete("/user/:id", async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.body.id);
+    const user = await User.findByIdAndDelete(req.params?.id);
     res.send("User deleted successfully");
   } catch (err) {
-    res.status(400).send("Error while deleting user");
+    res.status(400).send("Error while deleting user" + err);
   }
 });
 
 //#. Update user
-app.patch("/user", async (req, res) => {
+app.patch("/user/:id", async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.body.id, req.body);
+    const allowedFields = [
+      "firstName",
+      "lastName",
+      "age",
+      "photoUrl",
+      "gender",
+      "skills",
+    ];
+    if (!Object.keys(req.body).every((item) => allowedFields.includes(item))) {
+      throw new Error("Invalid fields for update");
+    }
+
+    if (req.body?.skills.length > 10) {
+      throw new Error("Skills cannot exceed 10");
+    }
+    const user = await User.findByIdAndUpdate(req.params?.id, req.body, {
+      runValidators: true,
+    });
     res.send("User updated successfully");
   } catch (err) {
-    res.status(400).send("Error while updating user");
+    res.status(400).send("Error while updating user" + err);
   }
 });
