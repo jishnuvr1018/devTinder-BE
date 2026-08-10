@@ -1,13 +1,13 @@
 const express = require("express");
+var cookieParser = require("cookie-parser");
 const { authMiddleware } = require("./middlewares/auth");
 const app = express();
 const { dbConnect } = require("./config/database");
 const User = require("./models/user");
-const bcrypt = require("bcrypt");
-const saltRounds = 10;
 
-//#. Middleware to parse raw json data
+//#. Middleware to parse raw json data && cookie parser middleware
 app.use(express.json());
+app.use(cookieParser());
 
 //#. Connect to DB and start the server
 dbConnect()
@@ -35,17 +35,18 @@ app.post("/signup", async (req, res) => {
       gender,
       skills,
     } = req.body;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
     const user = new User({
       firstName,
       lastName,
       email,
-      password: hashedPassword,
+      password: "",
       age,
       photoUrl,
       gender,
       skills,
     });
+    const hashedPassword = await user.hashPassword(password);
+    user.password = hashedPassword;
     await user.save();
     res.status(201).send("User created successfully");
   } catch (err) {
@@ -61,14 +62,34 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Credintials are invalid");
     }
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
-      throw new Error("Credintials are invalid");
-    } else {
+    const isPasswordMatch = await user.validPassword(password);
+    if (isPasswordMatch) {
+      const token = await user.generateToken();
+      res.cookie("token", token);
       res.status(200).send("Login successful");
+    } else {
+      throw new Error("Credintials are invalid");
     }
   } catch (err) {
-    res.status(400).send("Error while creating user" + err);
+    res.status(400).send("Error" + err);
+  }
+});
+
+// #. API to get user profile
+app.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    res.send(req?.user);
+  } catch (err) {
+    res.status(400).send("Error:" + err.message);
+  }
+});
+
+//#. send connect request
+app.post("/sendConnectionRequest", authMiddleware, async (req, res) => {
+  try {
+    res.send(req?.user?.firstName + " sended connection request");
+  } catch (err) {
+    res.status(400).send("Error:" + err.message);
   }
 });
 
