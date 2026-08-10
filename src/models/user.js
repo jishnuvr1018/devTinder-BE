@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const validator = require("validator");
 
 const userSchema = new Schema(
   {
@@ -31,6 +32,12 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
+      validate: {
+        validator: function (v) {
+          return validator.isStrongPassword(v);
+        },
+        message: (props) => `${props.value} is not a strong password!`,
+      },
     },
     age: {
       type: Number,
@@ -41,6 +48,12 @@ const userSchema = new Schema(
       type: String,
       default:
         "https://img.magnific.com/premium-vector/translator-icon_1076610-18679.jpg?semt=ais_test_b&w=740&q=80",
+      validate: {
+        validator: function (v) {
+          return validator.isURL(v);
+        },
+        message: (props) => `${props.value} is not a valid URL!`,
+      },
     },
     gender: {
       type: String,
