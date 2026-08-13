@@ -22,6 +22,7 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
+      index: true,
       lowercase: true,
       trim: true,
       validate: {
@@ -63,6 +64,11 @@ const userSchema = new Schema(
     },
     skills: {
       type: [String],
+      maxlength: [10, "Skills cannot exceed 10"],
+    },
+    about: {
+      type: String,
+      maxlength: [500, "About section cannot exceed 500 characters"],
     },
   },
   { timestamps: true },
