@@ -7,6 +7,7 @@ const validateProfile = async (data) => {
     "photoUrl",
     "gender",
     "skills",
+    "about",
   ];
 
   const isValid = Object.keys(data).every((field) =>

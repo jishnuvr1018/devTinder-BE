@@ -15,6 +15,7 @@ authRouter.post("/signup", async (req, res) => {
       photoUrl,
       gender,
       skills,
+      about,
     } = req.body;
     const user = new User({
       firstName,
@@ -25,6 +26,7 @@ authRouter.post("/signup", async (req, res) => {
       photoUrl,
       gender,
       skills,
+      about,
     });
     const hashedPassword = await user.hashPassword(password);
     user.password = hashedPassword;
