@@ -13,7 +13,7 @@ userRouter.get("/request/recieved", authMiddleware, async (req, res) => {
     const requestsData = await ConnectionRequest.find({
       receiverId: loggedInUser._id,
       status: "interested",
-    }).populate("senderId", ["firstName", "lastName"]);
+    }).populate("senderId", FieldsToShow);
 
     res.json({
       data: requestsData,
@@ -33,8 +33,8 @@ userRouter.get("/connections", authMiddleware, async (req, res) => {
         { receiverId: loggedInUser._id, status: "accepted" },
       ],
     })
-      .populate("senderId", ["firstName", "lastName"])
-      .populate("receiverId", ["firstName", "lastName"]);
+      .populate("senderId", FieldsToShow)
+      .populate("receiverId", FieldsToShow);
 
     const connections = connectionData.map((connection) => {
       if (connection.senderId._id.equals(loggedInUser._id)) {
