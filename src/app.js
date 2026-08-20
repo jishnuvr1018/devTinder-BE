@@ -1,5 +1,6 @@
 const express = require("express");
 var cookieParser = require("cookie-parser");
+var cors = require("cors");
 const { authMiddleware } = require("./middlewares/auth");
 const { dbConnect } = require("./config/database");
 const authRouter = require("./routes/authRoute");
@@ -12,6 +13,12 @@ const app = express();
 //#. Middleware to parse raw json data && cookie parser middleware
 app.use(express.json()); //otherwise raw json data undefined
 app.use(cookieParser()); //otherwise cookies undefined
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 //#. Runs the route synchronously
 app.use("/", authRouter);

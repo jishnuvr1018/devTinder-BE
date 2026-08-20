@@ -1,6 +1,7 @@
 const express = require("express");
 const authRouter = express.Router();
 const User = require("../models/user");
+const { getUserDetails } = require("../utils/getUserDetails");
 
 // #. Signup API
 authRouter.post("/signup", async (req, res) => {
@@ -46,7 +47,8 @@ authRouter.post("/login", async (req, res) => {
     if (isPasswordMatch) {
       const token = await user.generateToken();
       res.cookie("token", token);
-      res.status(200).send("Login successful");
+      const userData = await getUserDetails(user);
+      res.status(200).json({ message: "Login succesfull", data: userData });
     } else {
       throw new Error("Credintials are invalid");
     }
@@ -58,7 +60,7 @@ authRouter.post("/login", async (req, res) => {
 //#. Logout API
 authRouter.post("/logout", async (req, res) => {
   try {
-    res.cookie("token", null, { expires: new Date(0) });
+    res.clearCookie("token");
     res.status(200).send("Logout successful");
   } catch (err) {
     res.status(400).send("Error:" + err);
